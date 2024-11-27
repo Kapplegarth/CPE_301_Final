@@ -1,0 +1,199 @@
+#include <Stepper.h>
+#include "RTC.h" //includes displayTime() function
+#include "LCD.h"
+#include <dht.h> //install the DHTLib library
+dht DHT;
+#define DHT11_PIN 7
+#define TEMP_THRESHOLD 25
+#define VENT_LOWER_THRESHOLD 200
+#define VENT_UPPER_THRESHOLD 900
+#define WATER_SIGNAL A1
+#define WATER_POWER 36
+#define WATER_THRESHOLD 100
+//Create Stepper Motor
+const int stepsPerRevolution = 2038;
+//pin 32 IN1, Pin 34 IN2, IN3 33, Pin 35 IN4
+Stepper myStepper = Stepper(stepsPerRevolution, 32,33,34,35);
+//Create ISR for Start and Stop button and Reset
+//Declare Variables
+volatile char state;//d is for disabled, r for running, i for idle, and e for error
+char previousState;//d is for disabled, r for running, i for idle, and e for error
+double waterLevel = 0;
+//Set UP DC Motor
+int dir1 = 30;
+int dir2 =31;
+unsigned long previousMillis = 0;
+const long interval = 60000;
+unsigned long currentMillis = 0;
+void setup()
+{
+  Serial.begin(9600);
+  //Set the Water sensor
+  pinMode(WATER_POWER, OUTPUT);
+  pinMode(18, INPUT);
+  digitalWrite(WATER_POWER, LOW);
+  rtc_setup();
+  lcd_setup();
+  state = 'd';//state is disabled
+  previousState = 'd';//Set the previous state
+  //Set the ISR Stop Button pin 24
+  pinMode(19, INPUT_PULLUP);
+  attachInterrupt (digitalPinToInterrupt(19),setToDisabled,RISING);
+  //Set the ISR start Button pin 23
+  pinMode(18, INPUT_PULLUP);
+  attachInterrupt (digitalPinToInterrupt(18),startCooler,RISING);
+  //Set the ISR reset button to pin 25
+  pinMode(3, INPUT_PULLUP);
+  attachInterrupt (digitalPinToInterrupt(3),resetCooler,RISING);
+  //Set up the lights
+  pinMode(26,OUTPUT);//pin 26 is yellow
+  pinMode(27,OUTPUT);//pin 27 is green
+  pinMode(28,OUTPUT);//pin 28 is blue
+  pinMode(29,OUTPUT);//Pin 29 is Red
+  //Set up DC Motor
+  pinMode(dir1,OUTPUT);
+  pinMode(dir2,OUTPUT);
+  //Set up the vent potentiometer
+  pinMode(A0,INPUT);
+  pinMode(23,INPUT);
+}
+
+void loop(){
+  runStates();
+  changeState();
+  currentMillis = millis();
+  
+}
+
+void changeState(){
+  int time = millis();
+  int chk = DHT.read11(DHT11_PIN);
+  if(state != previousState){//Check for a state change
+    displayStateChange();
+    previousState = state;
+  }
+  if(((state =='i')||(state =='r')) && (getWaterValue()< WATER_THRESHOLD)){
+    state = 'e';
+  } 
+  if((state == 'r') && (DHT.temperature<TEMP_THRESHOLD)){
+    state = 'i';
+  }
+  if((state == 'i') && (DHT.temperature>TEMP_THRESHOLD)){
+    state = 'r';
+  }
+}
+void printEnvironment(){
+  lcd.clear();
+  int chk = DHT.read11(DHT11_PIN);
+  Serial.print("Temperature = ");
+  Serial.println(DHT.temperature);
+  Serial.print("Humidity = ");
+  Serial.println(DHT.humidity);
+  lcd.setCursor(0, 0); // move cursor to (0, 0)
+  lcd.print("TEMP:"); // print message at (0, 0)
+  lcd.setCursor(6, 0); // move cursor to (0, 0)
+  lcd.print(DHT.temperature);
+  lcd.setCursor(0, 1); // move cursor to (2, 1)
+  lcd.print("HUMIDITY:"); // print message at (2, 1)
+  lcd.setCursor(11, 1); // move cursor to (0, 0)
+  lcd.print(DHT.humidity);
+
+}
+
+void runStates(){
+  if(state == 'd'){
+    fanOff();
+    digitalWrite(26, HIGH);
+    digitalWrite(27, LOW);
+    digitalWrite(28, LOW);
+    digitalWrite(29, LOW);
+    ventMovement();
+
+  }
+  if(state == 'i'){
+    fanOff();
+    sendEnvInfo();
+    digitalWrite(26,LOW);
+    digitalWrite(27,HIGH);
+    digitalWrite(28,LOW);
+    digitalWrite(29,LOW);
+    ventMovement();
+  }
+  if(state == 'r'){
+    fanOn();
+    sendEnvInfo();
+    digitalWrite(26, LOW);
+    digitalWrite(27, LOW);
+    digitalWrite(28, HIGH);
+    digitalWrite(29, LOW);
+    ventMovement();
+  }
+  if(state == 'e'){
+    digitalWrite(26, LOW);
+    digitalWrite(27, LOW);
+    digitalWrite(28, LOW);
+    digitalWrite(29, HIGH);
+    displayErrorMessage();
+    fanOff();
+  }
+}
+void sendEnvInfo(){
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    printEnvironment();
+  }
+}
+void fanOn(){
+  digitalWrite(dir1,HIGH);
+  digitalWrite(dir2,LOW);
+}
+
+void fanOff(){
+  digitalWrite(dir1,LOW);
+  digitalWrite(dir2,LOW);
+}
+
+void ventMovement(){//Pin A0 will be the analog PIN
+  if(analogRead(A0)<VENT_LOWER_THRESHOLD){
+      myStepper.setSpeed(10);
+      myStepper.step(-stepsPerRevolution);
+      displayMotorMovement();
+  }
+  if(VENT_UPPER_THRESHOLD<analogRead(A0)){
+      myStepper.setSpeed(10);
+      myStepper.step(stepsPerRevolution);
+      displayMotorMovement();
+  }
+
+}
+void displayMotorMovement(){
+  Serial.print("The vent has changed at the following time: ");
+  displayTime();
+}
+void displayStateChange(){
+  Serial.print("The state has changed at the following time: ");
+  displayTime();
+}
+void setToDisabled(){
+  state = 'd';
+  reset_lcd();
+}
+void startCooler(){
+  if(state == 'd'){
+    state = 'i';
+  }
+}
+void resetCooler(){
+  if(state == 'e'){
+    state = 'i';
+    reset_lcd();
+  }
+}
+int getWaterValue(){
+  int value = 0;
+  digitalWrite(WATER_POWER,HIGH);
+  delay(10);
+  value = analogRead(WATER_SIGNAL);
+  digitalWrite(WATER_POWER, LOW);
+  return value;
+}
