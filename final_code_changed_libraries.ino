@@ -2,6 +2,7 @@
 #include <Stepper.h>
 #include <RTClib.h>
 //Complete the Real time Clock
+//Does Github work at all
 RTC_DS3231 rtc;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday","Friday", "Saturday"};
 // LCD pins <--> Arduino pins
