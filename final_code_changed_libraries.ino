@@ -4,7 +4,7 @@
 //Complete the Real time Clock
 //Does Github work at all
 RTC_DS3231 rtc;
-char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday","Friday", "Saturday"};
+char daysOfTheWeek[7][12] = {"Monday", "Monday", "Tuesday", "Wednesday", "Thursday","Friday", "Saturday"};
 // LCD pins <--> Arduino pins
 const int RS = 12, EN = 11, D4 = 5, D5 = 4, D6 = 2, D7 = 8;
 LiquidCrystal lcd(RS, EN, D4, D5, D6, D7);
