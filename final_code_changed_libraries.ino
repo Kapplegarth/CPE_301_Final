@@ -8,6 +8,21 @@
 #include <RTClib.h>
 //Complete the Real time Clock
 //Does Github work at all
+#define RDA 0x80
+#define TBE 0x20
+//Create Serial Registers
+volatile unsigned char *myUCSR0A = (unsigned char *)0x00C0;
+volatile unsigned char *myUCSR0B = (unsigned char *)0x00C1;
+volatile unsigned char *myUCSR0C = (unsigned char *)0x00C2;
+volatile unsigned int  *myUBRR0  = (unsigned int *) 0x00C4;
+volatile unsigned char *myUDR0   = (unsigned char *)0x00C6;
+
+//Create the Analog Read stuff
+volatile unsigned char* my_ADMUX = (unsigned char*) 0x7C;
+volatile unsigned char* my_ADCSRB = (unsigned char*) 0x7B;
+volatile unsigned char* my_ADCSRA = (unsigned char*) 0x7A;
+volatile unsigned int* my_ADC_DATA = (unsigned int*) 0x78;
+
 //Hopefully it does
 RTC_DS3231 rtc;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday","Friday", "Saturday"};
@@ -41,7 +56,7 @@ const long interval = 60000;
 unsigned long currentMillis = 0;
 void setup()
 {
-  Serial.begin(9600);
+  U0init(9600);
   lcd.begin(16, 2);
   //Set the Water sensor
   pinMode(WATER_POWER, OUTPUT);
@@ -251,4 +266,15 @@ void displayErrorMessage(){
     lcd.print("Water level low");
     printErrorOnce = 1;
   }
+}
+void U0init(int U0baud)
+{
+ unsigned long FCPU = 16000000;
+ unsigned int tbaud;
+ tbaud = (FCPU / 16 / U0baud - 1);
+ // Same as (FCPU / (16 * U0baud)) - 1;
+ *myUCSR0A = 0x20;
+ *myUCSR0B = 0x18;
+ *myUCSR0C = 0x06;
+ *myUBRR0  = tbaud;
 }
