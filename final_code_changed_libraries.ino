@@ -1,3 +1,8 @@
+//Kyle Applegarth
+//Ryan Zheng
+//Ronald Icely
+//Adam Veilleaux
+
 #include <LiquidCrystal.h>
 #include <Stepper.h>
 #include <RTClib.h>
@@ -18,7 +23,7 @@ volatile unsigned char* my_ADCSRB = (unsigned char*) 0x7B;
 volatile unsigned char* my_ADCSRA = (unsigned char*) 0x7A;
 volatile unsigned int* my_ADC_DATA = (unsigned int*) 0x78;
 
-
+//Hopefully it does
 RTC_DS3231 rtc;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday","Friday", "Saturday"};
 // LCD pins <--> Arduino pins
