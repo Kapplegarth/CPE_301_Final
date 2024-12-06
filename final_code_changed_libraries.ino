@@ -1,3 +1,8 @@
+//Kyle Applegarth
+//Ryan Zheng
+//Ronald Icely
+//Adam Veilleaux
+
 #include <LiquidCrystal.h>
 #include <Stepper.h>
 #include <RTClib.h>
