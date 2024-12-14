@@ -1,23 +1,27 @@
 #ifndef FANMOTOR_H
 #define FANMOTOR_H
 
-//Set UP DC Motor
-#define dir1 30
-#define dir2 31
+//direction 1 is port 30, PC7
+//direction 2 is port 31, PC6
+
+volatile unsigned char* fanMotor_portC = (unsigned char*) 0x28;
+volatile unsigned char* fanMotor_ddrC = (unsigned char*) 0x27;
+//volatile unsigned char* fanMotor_pinC = (unsigned char*) 0x26;
 
 void fanMotor_setup(){
-	pinMode(dir1,OUTPUT);
-	pinMode(dir2,OUTPUT);
+	//set PC7 and PC6 to output
+	*fanMotor_ddrC |= 0b11000000;
 }
 
 void fanOn(){
-	digitalWrite(dir1,HIGH);
-	digitalWrite(dir2,LOW);
+	//keep direction 2 off; turn on direction 1
+	*fanMotor_portC &= 0b10111111;
+	*fanMotor_portC |= 0b10000000;
 }
 
 void fanOff(){
-	digitalWrite(dir1,LOW);
-	digitalWrite(dir2,LOW);
+	//turn off both directions
+	*fanMotor_portC &= 0b00111111;
 }
 
 #endif
