@@ -133,24 +133,24 @@ void printEnvironment(){
 void runStates(){
   if(state == 'd'){
     fanOff();
-    turnOnLED(YELLOW)
+    turnOnLED(YELLOW);
     ventMovement();
 
   }
   if(state == 'i'){
     fanOff();
     sendEnvInfo();
-    turnOnLED(GREEN)
+    turnOnLED(GREEN);
     ventMovement();
   }
   if(state == 'r'){
     fanOn();
     sendEnvInfo();
-    turnOnLED(BLUE)
+    turnOnLED(BLUE);
     ventMovement();
   }
   if(state == 'e'){
-    turnOnLED(RED)
+    turnOnLED(RED);
     displayErrorMessage();
     fanOff();
   }
