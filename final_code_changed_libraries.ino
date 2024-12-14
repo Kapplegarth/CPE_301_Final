@@ -295,3 +295,16 @@ void adc_init()
   *my_ADMUX  &= 0b11011111; // clear bit 5 to 0 for right adjust result
   *my_ADMUX  &= 0b11100000; // clear bit 4-0 to 0 to reset the channel and gain bits
 }
+unsigned char U0kbhit()
+{
+  return *myUCSR0A & RDA;
+}
+unsigned char U0getchar()
+{
+  return *myUDR0;
+}
+void U0putchar(unsigned char U0pdata)
+{
+  while((*myUCSR0A & TBE)==0);
+  *myUDR0 = U0pdata;
+}
