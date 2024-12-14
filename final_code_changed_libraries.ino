@@ -35,7 +35,7 @@ dht DHT;
 #define TEMP_THRESHOLD 25
 #define VENT_LOWER_THRESHOLD 200
 #define VENT_UPPER_THRESHOLD 900
-#define WATER_SIGNAL A1
+#define WATER_SIGNAL 1
 #define WATER_POWER 36
 #define WATER_THRESHOLD 100
 int printErrorOnce = 0;
@@ -185,12 +185,12 @@ void fanOff(){
 }
 
 void ventMovement(){//Pin A0 will be the analog PIN
-  if(analogRead(A0)<VENT_LOWER_THRESHOLD){
+  if(adc_read(0)<VENT_LOWER_THRESHOLD){
       myStepper.setSpeed(10);
       myStepper.step(-stepsPerRevolution);
       displayMotorMovement();
   }
-  if(VENT_UPPER_THRESHOLD<analogRead(A0)){
+  if(VENT_UPPER_THRESHOLD<adc_read(0)){
       myStepper.setSpeed(10);
       myStepper.step(stepsPerRevolution);
       displayMotorMovement();
@@ -257,7 +257,7 @@ int getWaterValue(){
   int value = 0;
   digitalWrite(WATER_POWER,HIGH);
   delay(10);
-  value = analogRead(WATER_SIGNAL);
+  value = adc_read(WATER_SIGNAL);
   digitalWrite(WATER_POWER, LOW);
   return value;
 }
@@ -307,4 +307,27 @@ void U0putchar(unsigned char U0pdata)
 {
   while((*myUCSR0A & TBE)==0);
   *myUDR0 = U0pdata;
+}
+unsigned int adc_read(unsigned char adc_channel_num)
+{
+  // clear the channel selection bits (MUX 4:0)
+  *my_ADMUX  &= 0b11100000;
+  // clear the channel selection bits (MUX 5)
+  *my_ADCSRB &= 0b11110111;
+  // set the channel number
+  if(adc_channel_num > 7)
+  {
+    // set the channel selection bits, but remove the most significant bit (bit 3)
+    adc_channel_num -= 8;
+    // set MUX bit 5
+    *my_ADCSRB |= 0b00001000;
+  }
+  // set the channel selection bits
+  *my_ADMUX  += adc_channel_num;
+  // set bit 6 of ADCSRA to 1 to start a conversion
+  *my_ADCSRA |= 0x40;
+  // wait for the conversion to complete
+  while((*my_ADCSRA & 0x40) != 0);
+  // return the result in the ADC data register
+  return *my_ADC_DATA;
 }
