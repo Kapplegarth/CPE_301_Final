@@ -261,7 +261,7 @@ void resetCooler(){
 int getWaterValue(){
   int value = 0;
   digitalWrite(WATER_POWER,HIGH);
-  delay(10);
+  my_delay(100);
   value = adc_read(WATER_SIGNAL);
   digitalWrite(WATER_POWER, LOW);
   return value;
@@ -335,4 +335,29 @@ unsigned int adc_read(unsigned char adc_channel_num)
   while((*my_ADCSRA & 0x40) != 0);
   // return the result in the ADC data register
   return *my_ADC_DATA;
+}
+void my_delay(unsigned int freq)
+{
+  // calc period
+  double period = 1.0/double(freq);
+  // 50% duty cycle
+  double half_period = period/ 2.0f;
+  // clock period def
+  double clk_period = 0.0000000625;
+  // calc ticks
+  unsigned int ticks = (half_period/clk_period);
+  // stop the timer
+  *myTCCR1B &= ~0x07;
+  // set the counts
+  *myTCNT1 = (unsigned int) (65536 - ticks);
+
+  * myTCCR1A = 0x0;
+  // start the timer
+  * myTCCR1B |= 0x01;
+  // wait for overflow
+  while((*myTIFR1 & 0x01)==0); 
+  // stop the timer
+  *myTCCR1B &= ~0x07;   
+  // reset TOV           
+  *myTIFR1 |= 0x01;
 }
