@@ -116,10 +116,12 @@ void changeState(){
 void printEnvironment(){
   lcd.clear();
   int chk = DHT.read11(DHT11_PIN);
-  Serial.print("Temperature = ");
-  Serial.println(DHT.temperature);
-  Serial.print("Humidity = ");
-  Serial.println(DHT.humidity);
+  U0putchar("Temperature = ");
+  U0putchar(DHT.temperature);
+  U0putchar("\n")
+  U0putchar("Humidity = ");
+  U0putchar(DHT.humidity);
+  U0putchar("\n");
   lcd.setCursor(0, 0); // move cursor to (0, 0)
   lcd.print("TEMP:"); // print message at (0, 0)
   lcd.setCursor(6, 0); // move cursor to (0, 0)
@@ -199,42 +201,45 @@ void ventMovement(){//Pin A0 will be the analog PIN
 }
 void displayMotorMovement(){
   DateTime now = rtc.now();
-  Serial.print("The vent has changed at the following time: ");
-  Serial.print('/');
-  Serial.print(now.year(), DEC);
-  Serial.print('/');
-  Serial.print(now.month(), DEC);
-  Serial.print('/');
-  Serial.print(now.day(), DEC);
-  Serial.print(" (");
-  Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
-  Serial.print(") ");
-  Serial.print(now.hour(), DEC);
-  Serial.print(':');
-  Serial.print(now.minute(), DEC);
-  Serial.print(':');
-  Serial.print(now.second(), DEC);
-  Serial.println(" ");
+  U0putchar("The vent has changed at the following time: ");
+  U0putchar('/');
+  U0putchar(now.year(), DEC);
+  U0putchar('/');
+  U0putchar(now.month(), DEC);
+  U0putchar('/');
+  U0putchar(now.day(), DEC);
+  U0putchar(" (");
+  U0putchar(daysOfTheWeek[now.dayOfTheWeek()]);
+  U0putchar(") ");
+  U0putchar(now.hour(), DEC);
+  U0putchar(':');
+  U0putchar(now.minute(), DEC);
+  U0putchar(':');
+  U0putchar(now.second(), DEC);
+  U0putchar(" ");
+  U0putchar("\n");
 }
 void displayStateChange(){
   DateTime now = rtc.now();
-  Serial.println(" ");
-  Serial.print("The state has changed at the following time: ");
-  Serial.print('/');
-  Serial.print(now.year(), DEC);
-  Serial.print('/');
-  Serial.print(now.month(), DEC);
-  Serial.print('/');
-  Serial.print(now.day(), DEC);
-  Serial.print(" (");
-  Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
-  Serial.print(") ");
-  Serial.print(now.hour(), DEC);
-  Serial.print(':');
-  Serial.print(now.minute(), DEC);
-  Serial.print(':');
-  Serial.print(now.second(), DEC);
-  Serial.println(" ");
+  U0putchar(" ");
+  U0putchar("\n");
+  U0putchar("The state has changed at the following time: ");
+  U0putchar('/');
+  U0putchar(now.year(), DEC);
+  U0putchar('/');
+  U0putchar(now.month(), DEC);
+  U0putchar('/');
+  U0putchar(now.day(), DEC);
+  U0putchar(" (");
+  U0putchar(daysOfTheWeek[now.dayOfTheWeek()]);
+  U0putchar(") ");
+  U0putchar(now.hour(), DEC);
+  U0putchar(':');
+  U0putchar(now.minute(), DEC);
+  U0putchar(':');
+  U0putchar(now.second(), DEC);
+  U0putchar(" ");
+  U0putchar("\n")
 }
 void setToDisabled(){
   state = 'd';
