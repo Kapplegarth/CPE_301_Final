@@ -8,6 +8,8 @@
 #include <RTClib.h>
 
 #include "LEDs.h"
+#include "WaterSensor.h"
+#include "FanMotor.h"
 
 //Complete the Real time Clock
 //Does Github work at all
@@ -38,11 +40,9 @@ dht DHT;
 #define TEMP_THRESHOLD 25
 #define VENT_LOWER_THRESHOLD 200
 #define VENT_UPPER_THRESHOLD 900
-#define WATER_SIGNAL A1
-#define WATER_POWER 36
 #define WATER_THRESHOLD 100
 int printErrorOnce = 0;
-//Create Stepper Motor
+//Create Stepper Motorf
 const int stepsPerRevolution = 2038;
 //pin 32 IN1, Pin 34 IN2, IN3 33, Pin 35 IN4
 Stepper myStepper = Stepper(stepsPerRevolution, 32,33,34,35);
@@ -51,9 +51,7 @@ Stepper myStepper = Stepper(stepsPerRevolution, 32,33,34,35);
 volatile char state;//d is for disabled, r for running, i for idle, and e for error
 char previousState;//d is for disabled, r for running, i for idle, and e for error
 double waterLevel = 0;
-//Set UP DC Motor
-int dir1 = 30;
-int dir2 =31;
+
 unsigned long previousMillis = 0;
 const long interval = 60000;
 unsigned long currentMillis = 0;
@@ -62,9 +60,7 @@ void setup()
   U0init(9600);
   lcd.begin(16, 2);
   //Set the Water sensor
-  pinMode(WATER_POWER, OUTPUT);
-  pinMode(18, INPUT);
-  digitalWrite(WATER_POWER, LOW);
+  waterSensor_setup();
   rtc.begin();
   lcd.begin(16, 2); // set up number of columns and rows
   state = 'd';//state is disabled
@@ -81,8 +77,7 @@ void setup()
   //Set up the lights
   LEDs_setup();
   //Set up DC Motor
-  pinMode(dir1,OUTPUT);
-  pinMode(dir2,OUTPUT);
+  fanMotor_setup();
   //Set up the vent potentiometer
   pinMode(A0,INPUT);
   pinMode(23,INPUT);
@@ -161,15 +156,7 @@ void sendEnvInfo(){
     printEnvironment();
   }
 }
-void fanOn(){
-  digitalWrite(dir1,HIGH);
-  digitalWrite(dir2,LOW);
-}
 
-void fanOff(){
-  digitalWrite(dir1,LOW);
-  digitalWrite(dir2,LOW);
-}
 
 void ventMovement(){//Pin A0 will be the analog PIN
   if(analogRead(A0)<VENT_LOWER_THRESHOLD){
@@ -240,14 +227,7 @@ void resetCooler(){
     lcd.clear();
   }
 }
-int getWaterValue(){
-  int value = 0;
-  digitalWrite(WATER_POWER,HIGH);
-  delay(10);
-  value = analogRead(WATER_SIGNAL);
-  digitalWrite(WATER_POWER, LOW);
-  return value;
-}
+
 void displayErrorMessage(){
   if(printErrorOnce==0){
     lcd.clear();
