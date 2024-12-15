@@ -23,22 +23,22 @@ volatile unsigned char* my_ADCSRA = (unsigned char*) 0x7A;
 volatile unsigned int* my_ADC_DATA = (unsigned int*) 0x78;
 
 //Timer Variables
-volatile unsigned char *myTCCR1A = (unsigned char *) 0x80;
-volatile unsigned char *myTCCR1B = (unsigned char *) 0x81;
-volatile unsigned char *myTCCR1C = (unsigned char *) 0x82;
-volatile unsigned char *myTIMSK1 = (unsigned char *) 0x6F;
-volatile unsigned int  *myTCNT1  = (unsigned  int *) 0x84;
-volatile unsigned char *myTIFR1 =  (unsigned char *) 0x36;
+volatile unsigned char *myTCCR1A = (unsigned char*) 0x80;
+volatile unsigned char *myTCCR1B = (unsigned char*) 0x81;
+volatile unsigned char *myTCCR1C = (unsigned char*) 0x82;
+volatile unsigned char *myTIMSK1 = (unsigned char*) 0x6F;
+volatile unsigned int  *myTCNT1  = (unsigned  int*) 0x84;
+volatile unsigned char *myTIFR1 =  (unsigned char*) 0x36;
 
 //water sensor
-volatile unsigned char *PORTC =  (unsigned char *) 0x28;
-volatile unsigned char *DDRC =  (unsigned char *) 0x27;
+volatile unsigned char *portC =  (unsigned char*) 0x28;
+volatile unsigned char *ddrC =  (unsigned char*) 0x27;
 //start and stop buttons
-volatile unsigned char *PORTD =  (unsigned char *) 0x2B;
-volatile unsigned char *DDRD =  (unsigned char *) 0x2A;
+volatile unsigned char *portD =  (unsigned char*) 0x2B;
+volatile unsigned char *ddrD =  (unsigned char*) 0x2A;
 //reset button
-volatile unsigned char *PORTE =  (unsigned char *) 0x2E;
-volatile unsigned char *DDRE =  (unsigned char *) 0x2D;
+volatile unsigned char *portE =  (unsigned char*) 0x2E;
+volatile unsigned char *ddrE =  (unsigned char*) 0x2D;
 
 //Add the LED register
 #include "LEDs.h"
@@ -57,6 +57,8 @@ dht DHT;
 #define WATER_SIGNAL 1
 #define WATER_POWER 36
 #define WATER_THRESHOLD 100
+#define TBE 0x20
+#define RDA 0x80
 int printErrorOnce = 0;
 //Create Stepper Motor
 const int stepsPerRevolution = 2038;
@@ -78,23 +80,23 @@ void setup()
   adc_init();//Start the ADC Read
   lcd.begin(16, 2);
   //Set the Water sensor
-  *DDRC |= 0b00000010;
-  *PORTC &= 0b11111101; //start with water sensor off
+  *ddrC |= 0b00000010;
+  *portC &= 0b11111101; //start with water sensor off
   rtc.begin();
   lcd.begin(16, 2); // set up number of columns and rows
   state = 'd';//state is disabled
   previousState = 'd';//Set the previous state
   //Set the ISR Stop Button pin 19
-  *DDRD &= 0b11111011; //set to input with pullup
-  *PORTD |= 0b00000100;
+  *ddrD &= 0b11111011; //set to input with pullup
+  *portD |= 0b00000100;
   attachInterrupt (digitalPinToInterrupt(19),setToDisabled,RISING);
   //Set the ISR start Button pin 18
-  *DDRD &= 0b11110111; //set to input with pullup
-  *PORTD |= 0b00001000;
+  *ddrD &= 0b11110111; //set to input with pullup
+  *portD |= 0b00001000;
   attachInterrupt (digitalPinToInterrupt(18),startCooler,RISING);
   //Set the ISR reset button to pin 3
-  *DDRE &= 0b11011111; //set to input with pullup
-  *PORTE |= 0b00100000;
+  *ddrE &= 0b11011111; //set to input with pullup
+  *portE |= 0b00100000;
   attachInterrupt (digitalPinToInterrupt(3),resetCooler,RISING);
   //Set up the lights
   LEDs_setup();
@@ -266,10 +268,10 @@ void resetCooler(){
 }
 int getWaterValue(){
   int value = 0;
-  *PORTC |= 0b00000010; //turn water sensor on
+  *portC |= 0b00000010; //turn water sensor on
   my_delay(100);
   value = adc_read(WATER_SIGNAL);
-  *PORTC &= 0b11111101; //turn water sensor off
+  *portC &= 0b11111101; //turn water sensor off
   return value;
 }
 void displayErrorMessage(){
