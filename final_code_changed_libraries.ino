@@ -79,7 +79,7 @@ void setup()
   lcd.begin(16, 2);
   //Set the Water sensor
   *DDRC |= 0b00000010;
-  digitalWrite(WATER_POWER, LOW);
+  *PORTC &= 0b11111101; //start with water sensor off
   rtc.begin();
   lcd.begin(16, 2); // set up number of columns and rows
   state = 'd';//state is disabled
@@ -266,10 +266,10 @@ void resetCooler(){
 }
 int getWaterValue(){
   int value = 0;
-  digitalWrite(WATER_POWER,HIGH);
+  *PORTC |= 0b00000010; //turn water sensor on
   my_delay(100);
   value = adc_read(WATER_SIGNAL);
-  digitalWrite(WATER_POWER, LOW);
+  *PORTC &= 0b11111101; //turn water sensor off
   return value;
 }
 void displayErrorMessage(){
