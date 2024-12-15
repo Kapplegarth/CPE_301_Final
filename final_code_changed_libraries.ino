@@ -8,7 +8,7 @@
 #include <RTClib.h>
 //Complete the Real time Clock
 //Does Github work at all
-#include "FanMotor.h"
+
 //Create Serial Registers
 volatile unsigned char *myUCSR0A = (unsigned char *)0x00C0;
 volatile unsigned char *myUCSR0B = (unsigned char *)0x00C1;
@@ -57,8 +57,7 @@ volatile char state;//d is for disabled, r for running, i for idle, and e for er
 char previousState;//d is for disabled, r for running, i for idle, and e for error
 double waterLevel = 0;
 //Set UP DC Motor
-int dir1 = 30;
-int dir2 =31;
+#include "FanMotor.h"
 unsigned long previousMillis = 0;
 const long interval = 60000;
 unsigned long currentMillis = 0;
@@ -67,8 +66,6 @@ void setup()
   U0init(9600);
   adc_init();//Start the ADC Read
   lcd.begin(16, 2);
-  //Set up fan
-  fanMotor_setup();
   //Set the Water sensor
   pinMode(WATER_POWER, OUTPUT);
   pinMode(18, INPUT);
@@ -88,9 +85,8 @@ void setup()
   attachInterrupt (digitalPinToInterrupt(3),resetCooler,RISING);
   //Set up the lights
   LEDs_setup();
-  //Set up DC Motor
-  pinMode(dir1,OUTPUT);
-  pinMode(dir2,OUTPUT);
+  //Set up fan
+  fanMotor_setup();
   //Set up the vent potentiometer
   pinMode(A0,INPUT);
   pinMode(23,INPUT);
