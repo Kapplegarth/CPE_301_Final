@@ -35,7 +35,14 @@ volatile unsigned char *myTCCR1C = (unsigned char *) 0x82;
 volatile unsigned char *myTIMSK1 = (unsigned char *) 0x6F;
 volatile unsigned int  *myTCNT1  = (unsigned  int *) 0x84;
 volatile unsigned char *myTIFR1 =  (unsigned char *) 0x36;
-
+//Add the LED register
+#define YELLOW 1 //pin 26, PA4
+#define GREEN 2 //pin 27, PA5
+#define BLUE 3 //pin 28, PA6
+#define RED 4 //pin 29, PA7
+volatile unsigned char* leds_portA = (unsigned char*) 0x22;
+volatile unsigned char* leds_ddrA = (unsigned char*) 0x21;
+//volatile unsigned char* leds_pinA = (unsigned char*) 0x20;
 //Hopefully it does
 RTC_DS3231 rtc;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday","Friday", "Saturday"};
@@ -74,6 +81,7 @@ void setup()
   lcd.begin(16, 2);
   //Set up fan
   fanMotor_setup();
+	LEDs_setup();
   //Set the Water sensor
   pinMode(WATER_POWER, OUTPUT);
   pinMode(18, INPUT);
@@ -153,36 +161,24 @@ void printEnvironment(){
 void runStates(){
   if(state == 'd'){
     fanOff();
-    digitalWrite(26, HIGH);
-    digitalWrite(27, LOW);
-    digitalWrite(28, LOW);
-    digitalWrite(29, LOW);
+    turnOnLED(YELLOW);
     ventMovement();
 
   }
   if(state == 'i'){
     fanOff();
     sendEnvInfo();
-    digitalWrite(26,LOW);
-    digitalWrite(27,HIGH);
-    digitalWrite(28,LOW);
-    digitalWrite(29,LOW);
+    turnOnLED(GREEN);
     ventMovement();
   }
   if(state == 'r'){
     fanOn();
     sendEnvInfo();
-    digitalWrite(26, LOW);
-    digitalWrite(27, LOW);
-    digitalWrite(28, HIGH);
-    digitalWrite(29, LOW);
+    turnOnLED(BLUE);
     ventMovement();
   }
   if(state == 'e'){
-    digitalWrite(26, LOW);
-    digitalWrite(27, LOW);
-    digitalWrite(28, LOW);
-    digitalWrite(29, HIGH);
+    turnOnLED(RED);
     displayErrorMessage();
     fanOff();
   }
@@ -469,4 +465,29 @@ void fanOn(){
 void fanOff(){
 	//turn off both directions
 	*fanMotor_portC &= 0b00111111;
+}
+void LEDs_setup(){
+	//set PA4 through PA7 to output
+	*leds_ddrA |= 0b11110000;
+}
+
+void turnOnLED(int color){
+	switch (color){
+		case YELLOW:
+			*leds_portA |= 0b00010000; //first turn on the port
+			*leds_portA &= 0b00011111; //then turn off the other 3
+			break;
+		case GREEN:
+			*leds_portA |= 0b00100000;
+			*leds_portA &= 0b00101111;
+			break;
+		case BLUE:
+			*leds_portA |= 0b01000000;
+			*leds_portA &= 0b01001111;
+			break;
+		case RED:
+			*leds_portA |= 0b10000000;
+			*leds_portA &= 0b10001111;
+			break;
+	}
 }
