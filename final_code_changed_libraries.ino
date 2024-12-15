@@ -10,6 +10,11 @@
 //Does Github work at all
 #define RDA 0x80
 #define TBE 0x20
+#define FANMOTOR_H
+#define FANMOTOR_H
+//volatile unsigned char* fanMotor_pinC = (unsigned char*) 0x26;
+volatile unsigned char* fanMotor_portC = (unsigned char*) 0x28;
+volatile unsigned char* fanMotor_ddrC = (unsigned char*) 0x27;
 //Create Serial Registers
 volatile unsigned char *myUCSR0A = (unsigned char *)0x00C0;
 volatile unsigned char *myUCSR0B = (unsigned char *)0x00C1;
@@ -59,6 +64,8 @@ void setup()
   U0init(9600);
   adc_init();//Start the ADC Read
   lcd.begin(16, 2);
+  //Set up fan
+  fanMotor_setup();
   //Set the Water sensor
   pinMode(WATER_POWER, OUTPUT);
   pinMode(18, INPUT);
@@ -178,16 +185,6 @@ void sendEnvInfo(){
     printEnvironment();
   }
 }
-void fanOn(){
-  digitalWrite(dir1,HIGH);
-  digitalWrite(dir2,LOW);
-}
-
-void fanOff(){
-  digitalWrite(dir1,LOW);
-  digitalWrite(dir2,LOW);
-}
-
 void ventMovement(){//Pin A0 will be the analog PIN
   if(adc_read(0)<VENT_LOWER_THRESHOLD){
       myStepper.setSpeed(10);
@@ -449,4 +446,19 @@ void printChar(int a){
   if(a == 9){
     U0putchar('9');
   }
+}
+void fanMotor_setup(){
+	//set PC7 and PC6 to output
+	*fanMotor_ddrC |= 0b11000000;
+}
+
+void fanOn(){
+	//keep direction 2 off; turn on direction 1
+	*fanMotor_portC &= 0b10111111;
+	*fanMotor_portC |= 0b10000000;
+}
+
+void fanOff(){
+	//turn off both directions
+	*fanMotor_portC &= 0b00111111;
 }
