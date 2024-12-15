@@ -93,8 +93,8 @@ void setup()
   *PORTD |= 0b00001000;
   attachInterrupt (digitalPinToInterrupt(18),startCooler,RISING);
   //Set the ISR reset button to pin 3
-  *DDRD &= 0b11011111; //set to input with pullup
-  *PORTD |= 0b00100000;
+  *DDRE &= 0b11011111; //set to input with pullup
+  *PORTE |= 0b00100000;
   attachInterrupt (digitalPinToInterrupt(3),resetCooler,RISING);
   //Set up the lights
   LEDs_setup();
