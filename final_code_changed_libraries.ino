@@ -29,6 +29,17 @@ volatile unsigned char *myTCCR1C = (unsigned char *) 0x82;
 volatile unsigned char *myTIMSK1 = (unsigned char *) 0x6F;
 volatile unsigned int  *myTCNT1  = (unsigned  int *) 0x84;
 volatile unsigned char *myTIFR1 =  (unsigned char *) 0x36;
+
+//water sensor
+volatile unsigned char *PORTC =  (unsigned char *) 0x28;
+volatile unsigned char *DDRC =  (unsigned char *) 0x27;
+//start and stop buttons
+volatile unsigned char *PORTD =  (unsigned char *) 0x2B;
+volatile unsigned char *DDRD =  (unsigned char *) 0x2A;
+//reset button
+volatile unsigned char *PORTE =  (unsigned char *) 0x2E;
+volatile unsigned char *DDRE =  (unsigned char *) 0x2D;
+
 //Add the LED register
 #include "LEDs.h"
 //RTC
@@ -67,29 +78,29 @@ void setup()
   adc_init();//Start the ADC Read
   lcd.begin(16, 2);
   //Set the Water sensor
-  pinMode(WATER_POWER, OUTPUT);
-  pinMode(18, INPUT);
+  *DDRC |= 0b00000010;
   digitalWrite(WATER_POWER, LOW);
   rtc.begin();
   lcd.begin(16, 2); // set up number of columns and rows
   state = 'd';//state is disabled
   previousState = 'd';//Set the previous state
-  //Set the ISR Stop Button pin 24
-  pinMode(19, INPUT_PULLUP);
+  //Set the ISR Stop Button pin 19
+  *DDRD &= 0b11111011; //set to input with pullup
+  *PORTD |= 0b00000100;
   attachInterrupt (digitalPinToInterrupt(19),setToDisabled,RISING);
-  //Set the ISR start Button pin 23
-  pinMode(18, INPUT_PULLUP);
+  //Set the ISR start Button pin 18
+  *DDRD &= 0b11110111; //set to input with pullup
+  *PORTD |= 0b00001000;
   attachInterrupt (digitalPinToInterrupt(18),startCooler,RISING);
-  //Set the ISR reset button to pin 25
-  pinMode(3, INPUT_PULLUP);
+  //Set the ISR reset button to pin 3
+  *DDRD &= 0b11011111; //set to input with pullup
+  *PORTD |= 0b00100000;
   attachInterrupt (digitalPinToInterrupt(3),resetCooler,RISING);
   //Set up the lights
   LEDs_setup();
   //Set up fan
   fanMotor_setup();
   //Set up the vent potentiometer
-  pinMode(A0,INPUT);
-  pinMode(23,INPUT);
 }
 
 void loop(){
