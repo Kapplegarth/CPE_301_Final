@@ -8,13 +8,7 @@
 #include <RTClib.h>
 //Complete the Real time Clock
 //Does Github work at all
-#define RDA 0x80
-#define TBE 0x20
-#define FANMOTOR_H
-#define FANMOTOR_H
-//volatile unsigned char* fanMotor_pinC = (unsigned char*) 0x26;
-volatile unsigned char* fanMotor_portC = (unsigned char*) 0x28;
-volatile unsigned char* fanMotor_ddrC = (unsigned char*) 0x27;
+#include "FanMotor.h"
 //Create Serial Registers
 volatile unsigned char *myUCSR0A = (unsigned char *)0x00C0;
 volatile unsigned char *myUCSR0B = (unsigned char *)0x00C1;
@@ -439,19 +433,4 @@ void printChar(int a){
   if(a == 9){
     U0putchar('9');
   }
-}
-void fanMotor_setup(){
-	//set PC7 and PC6 to output
-	*fanMotor_ddrC |= 0b11000000;
-}
-
-void fanOn(){
-	//keep direction 2 off; turn on direction 1
-	*fanMotor_portC &= 0b10111111;
-	*fanMotor_portC |= 0b10000000;
-}
-
-void fanOff(){
-	//turn off both directions
-	*fanMotor_portC &= 0b00111111;
 }
