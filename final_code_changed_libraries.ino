@@ -116,12 +116,14 @@ void changeState(){
 void printEnvironment(){
   lcd.clear();
   int chk = DHT.read11(DHT11_PIN);
-  U0putchar("Temperature = ");
-  U0putchar(DHT.temperature);
-  U0putchar("\n")
-  U0putchar("Humidity = ");
-  U0putchar(DHT.humidity);
-  U0putchar("\n");
+  float a = DHT.temperature;
+  stringPrint("Temperature = ");
+  printFloat(a);
+  stringPrint("\n");
+  stringPrint("Humidity = ");
+  a = DHT.humidity;
+  printFloat(a);
+  stringPrint("\n");
   lcd.setCursor(0, 0); // move cursor to (0, 0)
   lcd.print("TEMP:"); // print message at (0, 0)
   lcd.setCursor(6, 0); // move cursor to (0, 0)
@@ -201,45 +203,58 @@ void ventMovement(){//Pin A0 will be the analog PIN
 }
 void displayMotorMovement(){
   DateTime now = rtc.now();
-  U0putchar("The vent has changed at the following time: ");
-  U0putchar('/');
-  U0putchar(now.year(), DEC);
-  U0putchar('/');
-  U0putchar(now.month(), DEC);
-  U0putchar('/');
-  U0putchar(now.day(), DEC);
-  U0putchar(" (");
-  U0putchar(daysOfTheWeek[now.dayOfTheWeek()]);
-  U0putchar(") ");
-  U0putchar(now.hour(), DEC);
-  U0putchar(':');
-  U0putchar(now.minute(), DEC);
-  U0putchar(':');
-  U0putchar(now.second(), DEC);
-  U0putchar(" ");
-  U0putchar("\n");
+  int data;
+  stringPrint("The vent has changed at the following time: ");
+  data = now.year(), DEC;
+  printInt(data);
+  stringPrint("/");
+  data  = now.month(), DEC;
+  printInt(data);
+  stringPrint("/");
+  data = now.day(), DEC;
+  printInt(data);
+  stringPrint(" (");
+  stringPrint(daysOfTheWeek[now.dayOfTheWeek()]);
+  stringPrint(") ");
+  data = now.hour(), DEC;
+  printInt(data);
+  stringPrint(":");
+  data =now.minute(), DEC;
+  printInt(data);
+  stringPrint(":");
+  data = now.second(), DEC;
+  printInt(data);
+  stringPrint(" ");
+  stringPrint("\n");
 }
 void displayStateChange(){
+  int data;
   DateTime now = rtc.now();
-  U0putchar(" ");
-  U0putchar("\n");
-  U0putchar("The state has changed at the following time: ");
-  U0putchar('/');
-  U0putchar(now.year(), DEC);
-  U0putchar('/');
-  U0putchar(now.month(), DEC);
-  U0putchar('/');
-  U0putchar(now.day(), DEC);
-  U0putchar(" (");
-  U0putchar(daysOfTheWeek[now.dayOfTheWeek()]);
-  U0putchar(") ");
-  U0putchar(now.hour(), DEC);
-  U0putchar(':');
-  U0putchar(now.minute(), DEC);
-  U0putchar(':');
-  U0putchar(now.second(), DEC);
-  U0putchar(" ");
-  U0putchar("\n")
+  stringPrint(" ");
+  stringPrint("\n");
+  stringPrint("The state has changed at the following time: ");
+  stringPrint("/");
+  data = now.year(), DEC;
+  printInt(data);
+  stringPrint("/");
+  data = now.month(), DEC;
+  printInt(data);
+  stringPrint("/");
+  data = now.day(), DEC;
+  printInt(data);
+  stringPrint(" (");
+  stringPrint(daysOfTheWeek[now.dayOfTheWeek()]);
+  stringPrint(") ");
+  data = now.hour(), DEC;
+  printInt(data);
+  stringPrint(":");
+  data = now.minute(), DEC;
+  printInt(data);
+  stringPrint(":");
+  data= now.second(), DEC;
+  printInt(data);
+  stringPrint(" ");
+  stringPrint("\n");
 }
 void setToDisabled(){
   state = 'd';
@@ -360,4 +375,78 @@ void my_delay(unsigned int freq)
   *myTCCR1B &= ~0x07;   
   // reset TOV           
   *myTIFR1 |= 0x01;
+}
+void stringPrint(String s){
+  int  i =0;
+  while(s[i] != '\0'){
+    U0putchar(s[i]);
+    i++;
+  }
+}
+void stringPrintLn(String s){
+  int  i = 0;
+  while(s[i] != '\0'){
+    U0putchar(s[i]);
+    i++;
+  }
+  U0putchar('\n');
+}
+void printFloat(float a){
+  int c = a;
+  int d;
+  d = c /1000;
+  printChar(d);
+  d = c /100;
+  printChar(d);
+  d = c / 10;
+  printChar(d);
+  d = c  % 1;
+  printChar(d);
+}
+void printInt(int a){
+  int d;
+  d = a /1000;
+  a = a - (d*1000);
+  printChar(d);
+  d = a /100;
+  a = a - (d*100);
+  printChar(d);
+  d = a / 10;
+  a = a - (d*10);
+  printChar(d);
+  d = a  / 1;
+  a = a - (d);
+  printChar(d);
+}
+void printChar(int a){
+  if(a == 0){
+    U0putchar('0');
+  }
+  if(a == 1){
+    U0putchar('1');
+  }
+  if(a == 2){
+    U0putchar('2');
+  }
+  if(a == 3){
+    U0putchar('3');
+  }
+  if(a == 4){
+    U0putchar('4');
+  }
+  if(a == 5){
+    U0putchar('5');
+  }
+  if(a == 6){
+    U0putchar('6');
+  }
+  if(a == 7){
+    U0putchar('7');
+  }
+  if(a == 8){
+    U0putchar('8');
+  }
+  if(a == 9){
+    U0putchar('9');
+  }
 }
